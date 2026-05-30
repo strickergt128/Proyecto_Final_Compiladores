@@ -1,0 +1,5 @@
+// Programa de prueba: Error léxico
+// El carácter @ no es reconocido por el lenguaje.
+
+sensor temp1;
+var temperatura = @;

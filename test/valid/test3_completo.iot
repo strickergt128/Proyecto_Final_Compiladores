@@ -1,0 +1,293 @@
+// ================================================================
+// Programa de prueba 3: Sistema completo de domótica IoT
+// Este programa es una prueba exhaustiva que usa TODAS las 20
+// instrucciones del lenguaje para verificar que el compilador
+// maneja correctamente archivos grandes y complejos.
+// ================================================================
+
+// --- Declaración de sensores (instrucción 1) ---
+sensor tempInterior;
+sensor tempExterior;
+sensor humedad1;
+sensor humedad2;
+sensor movimiento1;
+sensor luzAmbiente;
+
+// --- Declaración de actuadores (instrucción 2) ---
+actuador ventilador1;
+actuador ventilador2;
+actuador calefaccion;
+actuador alarma1;
+actuador sirena;
+actuador luzSala;
+actuador luzCocina;
+actuador luzJardin;
+actuador riego;
+
+// --- Declaración de variables (instrucción 10) ---
+var tempInt = 0;
+var tempExt = 0;
+var humInt = 0;
+var humExt = 0;
+var estadoMov = 0;
+var nivelLuz = 0;
+var umbralCalor = 30;
+var umbralFrio = 15;
+var umbralHumAlta = 85;
+var umbralHumBaja = 30;
+var contador = 0;
+var maxIteraciones = 100;
+var diferencia = 0;
+var promedio = 0;
+
+// ================================================================
+// BLOQUE 1: Lectura inicial de todos los sensores
+// ================================================================
+
+// Instrucciones 3, 4, 5 — Lectura de datos
+tempInt = leerTemperatura(tempInterior);
+tempExt = leerTemperatura(tempExterior);
+humInt = leerHumedad(humedad1);
+humExt = leerHumedad(humedad2);
+estadoMov = leerEstado(movimiento1);
+nivelLuz = leerEstado(luzAmbiente);
+
+// Instrucción 18 — Imprimir
+imprimir("=== Sistema IoT iniciado ===");
+imprimir("Leyendo sensores iniciales...");
+
+// Instrucción 19 — Registrar en log
+registrar(tempInterior, tempInt);
+registrar(tempExterior, tempExt);
+registrar(humedad1, humInt);
+registrar(humedad2, humExt);
+
+// ================================================================
+// BLOQUE 2: Control de temperatura con condicionales anidados
+// ================================================================
+
+// Instrucciones 12, 13 — si / si-sino
+si (tempInt > umbralCalor) {
+    // Hace calor: encender ventiladores
+    encender(ventilador1);
+    encender(ventilador2);
+    ajustar(ventilador1, 100);
+    ajustar(ventilador2, 80);
+    apagar(calefaccion);
+    imprimir("ALERTA: Temperatura alta detectada");
+    
+    // Sub-condición: si está MUY caliente
+    si (tempInt > 40) {
+        alerta("TEMPERATURA CRITICA", tempInt);
+        enviarSenal(alarma1, "TEMP_CRITICA");
+        ajustar(ventilador1, 100);
+        ajustar(ventilador2, 100);
+    }
+} sino {
+    // No hace tanto calor
+    si (tempInt < umbralFrio) {
+        // Hace frío: encender calefacción
+        apagar(ventilador1);
+        apagar(ventilador2);
+        encender(calefaccion);
+        ajustar(calefaccion, 75);
+        imprimir("Calefaccion encendida");
+        
+        si (tempInt < 5) {
+            alerta("TEMPERATURA MUY BAJA", tempInt);
+            ajustar(calefaccion, 100);
+        }
+    } sino {
+        // Temperatura normal
+        apagar(ventilador1);
+        apagar(ventilador2);
+        apagar(calefaccion);
+        imprimir("Temperatura en rango normal");
+    }
+}
+
+// ================================================================
+// BLOQUE 3: Control de humedad con ciclos
+// ================================================================
+
+// Instrucción 14 — mientras (ciclo)
+mientras (humInt > umbralHumAlta) {
+    encender(ventilador1);
+    ajustar(ventilador1, 90);
+    esperar(2000);
+    humInt = leerHumedad(humedad1);
+    registrar(humedad1, humInt);
+    imprimir("Reduciendo humedad...");
+}
+
+// Otro ciclo: riego automático si la humedad es baja
+mientras (humExt < umbralHumBaja) {
+    encender(riego);
+    ajustar(riego, 50);
+    esperar(5000);
+    humExt = leerHumedad(humedad2);
+    registrar(humedad2, humExt);
+    
+    si (humExt > 60) {
+        apagar(riego);
+        imprimir("Riego completado - humedad OK");
+    }
+}
+
+// ================================================================
+// BLOQUE 4: Sistema de seguridad (movimiento + alarma)
+// ================================================================
+
+si (estadoMov > 0) {
+    imprimir("MOVIMIENTO DETECTADO");
+    encender(alarma1);
+    encender(sirena);
+    enviarSenal(alarma1, "INTRUSO_DETECTADO");
+    alerta("Movimiento detectado en zona 1", estadoMov);
+    
+    // Encender todas las luces como medida de seguridad
+    encender(luzSala);
+    encender(luzCocina);
+    encender(luzJardin);
+    ajustar(luzSala, 100);
+    ajustar(luzCocina, 100);
+    ajustar(luzJardin, 100);
+    
+    esperar(10000);
+    
+    // Re-verificar después de la espera
+    estadoMov = leerEstado(movimiento1);
+    si (estadoMov == 0) {
+        apagar(alarma1);
+        apagar(sirena);
+        imprimir("Falsa alarma - sistema restaurado");
+    } sino {
+        alerta("INTRUSION CONFIRMADA", estadoMov);
+        enviarSenal(sirena, "EMERGENCIA");
+    }
+} sino {
+    imprimir("Sin movimiento detectado - todo seguro");
+}
+
+// ================================================================
+// BLOQUE 5: Control de iluminación inteligente
+// ================================================================
+
+si (nivelLuz < 30) {
+    // Poca luz: encender luces
+    encender(luzSala);
+    encender(luzCocina);
+    ajustar(luzSala, 80);
+    ajustar(luzCocina, 60);
+    imprimir("Luces encendidas - poca luz ambiental");
+} sino {
+    si (nivelLuz > 70) {
+        // Mucha luz: apagar luces
+        apagar(luzSala);
+        apagar(luzCocina);
+        imprimir("Luces apagadas - suficiente luz natural");
+    } sino {
+        // Luz media: nivel intermedio
+        encender(luzSala);
+        ajustar(luzSala, 40);
+        apagar(luzCocina);
+        imprimir("Iluminacion en modo ahorro");
+    }
+}
+
+// ================================================================
+// BLOQUE 6: Expresiones aritméticas complejas
+// ================================================================
+
+// Instrucción 11 — Asignación con expresiones
+diferencia = tempInt - tempExt;
+promedio = tempInt / 2 + tempExt / 2;
+var ajusteVent = diferencia * 3 + 10;
+var factorHum = humInt * 100 / humExt + 5;
+var indiceConfort = promedio - humInt / 10 + nivelLuz * 2;
+
+si (diferencia > 10) {
+    imprimir("Gran diferencia entre temp interior y exterior");
+    alerta("Diferencia termica", diferencia);
+}
+
+si (promedio > 25) {
+    ajustar(ventilador1, ajusteVent);
+    imprimir("Ventilador ajustado segun promedio");
+}
+
+// ================================================================
+// BLOQUE 7: Monitoreo continuo con ciclo complejo
+// ================================================================
+
+mientras (contador < maxIteraciones) {
+    // Leer todos los sensores en cada iteración
+    tempInt = leerTemperatura(tempInterior);
+    humInt = leerHumedad(humedad1);
+    
+    // Registrar datos
+    registrar(tempInterior, tempInt);
+    registrar(humedad1, humInt);
+    
+    // Lógica de control dentro del ciclo
+    si (tempInt > umbralCalor) {
+        encender(ventilador1);
+        ajustar(ventilador1, 90);
+    } sino {
+        si (tempInt < umbralFrio) {
+            encender(calefaccion);
+            ajustar(calefaccion, 70);
+        } sino {
+            apagar(ventilador1);
+            apagar(calefaccion);
+        }
+    }
+    
+    // Control de humedad dentro del ciclo
+    si (humInt > umbralHumAlta) {
+        alerta("Humedad alta en iteracion", contador);
+        encender(ventilador2);
+    } sino {
+        apagar(ventilador2);
+    }
+    
+    // Esperar antes de la siguiente lectura
+    esperar(1000);
+    
+    // Incrementar contador manualmente
+    contador = contador + 1;
+}
+
+// ================================================================
+// BLOQUE 8: Eventos programados y cancelación
+// ================================================================
+
+// Instrucción 16 — Programar evento
+programar(cada, 60, encender(luzJardin););
+programar(cada, 30, encender(riego););
+
+// Instrucción 17 — Cancelar evento
+cancelar(riego);
+
+// ================================================================
+// BLOQUE 9: Apagado general del sistema
+// ================================================================
+
+imprimir("=== Iniciando apagado del sistema ===");
+
+apagar(ventilador1);
+apagar(ventilador2);
+apagar(calefaccion);
+apagar(alarma1);
+apagar(sirena);
+apagar(luzSala);
+apagar(luzCocina);
+apagar(luzJardin);
+apagar(riego);
+
+// Registrar estado final
+registrar(tempInterior, tempInt);
+registrar(humedad1, humInt);
+
+alerta("Sistema apagado correctamente", contador);
+imprimir("=== Sistema IoT finalizado ===");

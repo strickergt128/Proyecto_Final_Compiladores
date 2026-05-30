@@ -1,0 +1,18 @@
+// Programa de prueba 2: Monitoreo de humedad con ciclo
+// Este programa monitorea la humedad en un ciclo,
+// registra los valores y genera una alerta si es crítica.
+
+sensor humid1;
+actuador alarma1;
+var humedad = 0;
+var limite = 80;
+
+mientras (humedad < limite) {
+    humedad = leerHumedad(humid1);
+    registrar(humid1, humedad);
+    esperar(1000);
+}
+
+alerta("Humedad critica", humedad);
+encender(alarma1);
+enviarSenal(alarma1, "ALERTA_HUMEDAD");

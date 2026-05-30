@@ -1,0 +1,9 @@
+// Programa de prueba: Error sintáctico
+// Falta el paréntesis de cierre en la condición del 'si'.
+
+sensor temp1;
+var temperatura = 25;
+
+si (temperatura > 30 {
+    encender(temp1);
+}

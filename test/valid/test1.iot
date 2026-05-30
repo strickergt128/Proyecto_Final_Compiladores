@@ -1,0 +1,18 @@
+// Programa de prueba 1: Control de temperatura
+// Este programa declara un sensor y un actuador,
+// lee la temperatura y enciende/apaga un ventilador.
+
+sensor temp1;
+actuador ventilador1;
+var temperatura = 0;
+
+temperatura = leerTemperatura(temp1);
+
+si (temperatura > 30) {
+    encender(ventilador1);
+    ajustar(ventilador1, 80);
+    imprimir("Ventilador encendido");
+} sino {
+    apagar(ventilador1);
+    imprimir("Ventilador apagado");
+}

@@ -1,0 +1,10 @@
+// Programa de prueba: Errores semánticos
+// 1. Usar un dispositivo no declarado
+// 2. Asignar a una variable no declarada
+// 3. Usar encender con un sensor (no actuador)
+
+sensor temp1;
+
+encender(motor1);
+temperatura = 50;
+encender(temp1);
